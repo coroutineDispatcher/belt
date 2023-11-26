@@ -76,7 +76,9 @@ fun LinkPropertyListItem(
                     is Resource.Success -> {
                         val painter: Painter = resource.value
                         Image(
-                            painter, contentDescription = "link image", modifier = Modifier
+                            painter,
+                            contentDescription = "link image",
+                            modifier = Modifier
                                 .fillMaxWidth()
                                 .height(100.dp)
                                 .clip(RoundedCornerShape(16.dp))

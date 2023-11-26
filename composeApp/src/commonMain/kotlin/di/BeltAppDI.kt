@@ -8,7 +8,6 @@ import io.kamel.image.config.Default
 import io.kamel.image.config.imageBitmapDecoder
 import io.ktor.client.HttpClient
 import io.realm.kotlin.Realm
-//import io.ktor.client.HttpClient
 import io.realm.kotlin.RealmConfiguration
 import model.LinkProperty
 import repository.LinksRepository

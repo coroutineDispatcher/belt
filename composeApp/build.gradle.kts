@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
@@ -6,6 +5,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     id("io.realm.kotlin")
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
 
 kotlin {
@@ -106,4 +106,3 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:+")
 }
-

@@ -52,7 +52,7 @@ fun App() {
                         onValueChange = { url = it },
                         placeholder = {
                             Text(text = "Place your link here")
-                        },
+                        }
                     )
                 }
 
@@ -92,10 +92,8 @@ fun App() {
                         title = "Something went wrong",
                         content = "Something went wrong. Please try again.",
                         onDismiss = {
-
                         },
                         onConfirm = {
-
                         }
                     )
                 }
@@ -106,10 +104,8 @@ fun App() {
                         title = "Invalid URL",
                         content = "The submitted URL is invalid. Please try another one.",
                         onDismiss = {
-
                         },
                         onConfirm = {
-
                         }
                     )
                 }
