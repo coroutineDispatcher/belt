@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
+    id("io.realm.kotlin")
 }
 
 kotlin {
@@ -28,8 +29,7 @@ kotlin {
     }
 
     val coroutinesVersion = "1.7.3"
-    val ktorVersion = "2.3.5"
-    val kotlinxHtmlVersion = "0.9.1"
+    val ktorVersion = "2.3.6"
 
     sourceSets {
 
@@ -38,6 +38,7 @@ kotlin {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
 
+            compileOnly("io.realm.kotlin:library-sync:1.12.0")
             implementation("io.ktor:ktor-client-android:$ktorVersion")
         }
         iosMain.dependencies {
@@ -52,10 +53,12 @@ kotlin {
 
             // TODO put constants to the right place
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+            implementation("io.realm.kotlin:library-sync:1.12.0")
+            implementation("com.fleeksoft.ksoup:ksoup:0.0.6")
             implementation("io.ktor:ktor-client-core:$ktorVersion")
             implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
             implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-            implementation("com.fleeksoft.ksoup:ksoup:0.0.2")
+            implementation("media.kamel:kamel-image:0.9.0")
         }
     }
 }
