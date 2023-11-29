@@ -19,8 +19,7 @@ fun BeltDialog(
         title = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.h6,
-                color = MaterialTheme.colors.primary
+                style = MaterialTheme.typography.h6
             )
         },
         onDismissRequest = { onDismiss() },
@@ -31,8 +30,7 @@ fun BeltDialog(
             ) {
                 Text(
                     text = "OK",
-                    style = MaterialTheme.typography.button,
-                    color = MaterialTheme.colors.surface
+                    style = MaterialTheme.typography.button
                 )
             }
         },

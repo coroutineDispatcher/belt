@@ -40,6 +40,7 @@ kotlin {
 
             compileOnly("io.realm.kotlin:library-sync:1.12.0")
             implementation("io.ktor:ktor-client-android:$ktorVersion")
+            implementation("androidx.startup:startup-runtime:1.1.1")
         }
         iosMain.dependencies {
             implementation("io.ktor:ktor-client-darwin:$ktorVersion")

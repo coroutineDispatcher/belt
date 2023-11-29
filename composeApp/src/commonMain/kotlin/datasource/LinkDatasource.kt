@@ -26,7 +26,7 @@ class LinkDatasource(
 
     val databaseObservable: Flow<List<LinkProperty>> =
         realm.query<LinkProperty>().asFlow().map { changes ->
-            changes.list
+            changes.list.reversed()
         }
 
     suspend fun tryAddToDb(newUrl: String): Unit = withContext(Dispatchers.IO) {

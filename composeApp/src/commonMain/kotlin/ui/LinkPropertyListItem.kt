@@ -1,12 +1,13 @@
 package ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -23,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.kamel.core.Resource
@@ -40,57 +40,60 @@ fun LinkPropertyListItem(
     Surface(
         shape = RoundedCornerShape(4.dp),
         elevation = 2.dp,
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier.padding(8.dp).clickable { }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.h6,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(Modifier.height(4.dp))
-
-                Text(
-                    text = item.url,
-                    style = MaterialTheme.typography.body1,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f).fillMaxHeight().align(Alignment.CenterVertically)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                when (val resource = asyncPainterResource(item.image.orEmpty())) {
-                    is Resource.Loading -> {
-                        Text("Loading...")
-                    }
+                Column(modifier = Modifier.weight(2f).padding(8.dp)) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.h6,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-                    is Resource.Success -> {
-                        val painter: Painter = resource.value
-                        Image(
-                            painter,
-                            contentDescription = "link image",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                        )
-                    }
+                    Text(
+                        text = item.url,
+                        style = MaterialTheme.typography.body1,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
-                    is Resource.Failure -> {
-                        println(resource.exception)
+                Box(
+                    modifier = Modifier.weight(1f).padding(8.dp).clip(RoundedCornerShape(16.dp))
+                ) {
+                    when (val resource = asyncPainterResource(item.image.orEmpty())) {
+                        is Resource.Loading -> {
+                            Text("Loading...")
+                        }
+
+                        is Resource.Success -> {
+                            Image(
+                                painter = resource.value,
+                                contentDescription = "link image",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                            )
+                        }
+
+                        is Resource.Failure -> {
+                            // TODO Failure image
+                            println(resource.exception)
+                        }
                     }
                 }
+            }
+
+            Row {
+                // TODO Tags
+
                 Row(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier.align(Alignment.CenterVertically).weight(1f)
                 ) {
                     IconButton(
                         onClick = { onFavoriteClick(item) },
