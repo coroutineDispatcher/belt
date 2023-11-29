@@ -16,8 +16,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.runtime.Composable
@@ -35,12 +35,13 @@ fun LinkPropertyListItem(
     item: LinkProperty,
     onFavoriteClick: (LinkProperty) -> Unit,
     onShareClick: (LinkProperty) -> Unit,
-    onDeleteClick: (LinkProperty) -> Unit
+    onMoreClicked: (LinkProperty) -> Unit,
+    onItemClick: (LinkProperty) -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(4.dp),
         elevation = 2.dp,
-        modifier = Modifier.padding(8.dp).clickable { }
+        modifier = Modifier.padding(8.dp).clickable { onItemClick(item) }
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -113,10 +114,10 @@ fun LinkPropertyListItem(
                     }
 
                     IconButton(
-                        onClick = { onDeleteClick(item) },
+                        onClick = { onMoreClicked(item) },
                         modifier = Modifier.padding(4.dp)
                     ) {
-                        Icon(Icons.Filled.Delete, "Delete")
+                        Icon(Icons.Filled.MoreVert, "Delete")
                     }
                 }
             }
