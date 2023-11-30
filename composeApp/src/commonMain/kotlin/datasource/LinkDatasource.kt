@@ -7,6 +7,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
+import io.realm.kotlin.ext.toRealmList
 import io.realm.kotlin.types.RealmUUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import model.LinkProperty
+import model.LinkTagOperation
 
 private const val PROPERTY_TITLE = "og:title"
 private const val PROPERTY_IMAGE = "og:image"
@@ -27,6 +29,17 @@ class LinkDatasource(
     val databaseObservable: Flow<List<LinkProperty>> =
         realm.query<LinkProperty>().asFlow().map { changes ->
             changes.list.reversed()
+        }
+
+    fun tagsObservable(filter: String): Flow<List<String>> =
+        realm.query<LinkProperty>().asFlow().map { changes ->
+            changes.list.reversed().map { it.tags }.flatten().filter { tag ->
+                if (filter.isEmpty()) {
+                    true
+                } else {
+                    tag.contains(filter)
+                }
+            }
         }
 
     suspend fun tryAddToDb(newUrl: String): Unit = withContext(Dispatchers.IO) {
@@ -83,6 +96,22 @@ class LinkDatasource(
         realm.write {
             item?.let { itemToDelete ->
                 findLatest(itemToDelete)?.also { delete(it) }
+            }
+        }
+    }
+
+    suspend fun updateTag(linkProperty: LinkProperty, tag: String, operation: LinkTagOperation) {
+        val item = realm.query<LinkProperty>("id == $0", linkProperty.id).find().firstOrNull()
+        realm.write {
+            item?.let {
+                findLatest(item)?.also {
+                    when (operation) {
+                        LinkTagOperation.Add -> it.tags = (it.tags + tag).toRealmList()
+                        LinkTagOperation.Remove -> it.tags = (it.tags - tag).toRealmList()
+                    }
+
+                    copyToRealm(it)
+                }
             }
         }
     }

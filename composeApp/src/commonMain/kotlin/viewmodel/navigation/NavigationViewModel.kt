@@ -1,4 +1,4 @@
-package viewmodel
+package viewmodel.navigation
 
 import Navigation
 import kotlinx.coroutines.CoroutineScope
@@ -8,6 +8,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import viewmodel.ViewModel
 
 class NavigationViewModel : ViewModel {
     override val viewModelScope: CoroutineScope =

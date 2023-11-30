@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Chip
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +38,7 @@ import model.LinkProperty
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalResourceApi::class)
+@OptIn(ExperimentalResourceApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun LinkPropertyListItem(
     item: LinkProperty,
@@ -42,6 +48,7 @@ fun LinkPropertyListItem(
     onTagClicked: (LinkProperty) -> Unit,
     onItemClick: (LinkProperty) -> Unit
 ) {
+    val tags = remember { item.tags.toList() }
     Surface(
         shape = RoundedCornerShape(4.dp),
         elevation = 2.dp,
@@ -94,13 +101,25 @@ fun LinkPropertyListItem(
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                LazyRow(Modifier.weight(1f).padding(4.dp)) {
+                    items(tags) { tag ->
+                        Chip(
+                            onClick = { Unit },
+                            modifier = Modifier.wrapContentSize().padding(2.dp)
+                        ) {
+                            Text(tag)
+                        }
+                    }
+                }
+
                 Row(
-                    modifier = Modifier.align(Alignment.CenterVertically).weight(1f)
+                    modifier = Modifier.align(Alignment.CenterVertically).weight(1f),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     IconButton(
                         onClick = { onFavoriteClick(item) },
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier.padding(2.dp)
                     ) {
                         val icon =
                             if (item.favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
@@ -110,21 +129,21 @@ fun LinkPropertyListItem(
 
                     IconButton(
                         onClick = { onShareClick(item) },
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier.padding(2.dp)
                     ) {
                         Icon(Icons.Filled.Share, "Share")
                     }
 
                     IconButton(
                         onClick = { onTagClicked(item) },
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier.padding(2.dp)
                     ) {
                         Icon(painter = painterResource("tag.png"), "Tag")
                     }
 
                     IconButton(
                         onClick = { onDeleteClicked(item) },
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier.padding(2.dp)
                     ) {
                         Icon(Icons.Filled.Delete, "Delete")
                     }

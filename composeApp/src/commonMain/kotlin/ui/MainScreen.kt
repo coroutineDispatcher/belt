@@ -29,14 +29,13 @@ import androidx.compose.ui.unit.dp
 import di.BeltAppDI
 import linkManager
 import model.LinkProperty
-import theme.AppTheme
 import viewmodel.main.MainViewModel
 
 @Composable
 fun MainScreen(
     onNavigateToTags: (LinkProperty) -> Unit
 ) {
-    val viewModel = remember { BeltAppDI.mainViewModel }
+    val viewModel = remember { BeltAppDI.mainViewModel() }
     val linkManager = remember { linkManager }
     var url by remember { mutableStateOf("") }
     var data by remember { mutableStateOf(emptyList<LinkProperty>()) }
@@ -45,96 +44,94 @@ fun MainScreen(
     DisposableEffect(Unit) {
         onDispose { viewModel.dispose() }
     }
-    AppTheme {
-        Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    OutlinedTextField(
-                        value = url,
-                        onValueChange = { url = it },
-                        placeholder = {
-                            Text(text = "Place your link here")
-                        },
-                        modifier = Modifier.height(50.dp).weight(2f)
-                    )
-                    TextButton(
-                        onClick = {
-                            viewModel.validateAndGetMetadata(url)
-                            url = ""
-                        },
-                        modifier = Modifier.wrapContentHeight().fillMaxWidth()
-                            .align(Alignment.CenterVertically).weight(1f)
-                            .padding(4.dp)
-                    ) {
-                        Text("Add")
-                    }
-                }
-            }
-        }) { padding ->
-            AnimatedVisibility(
-                data.isNotEmpty(),
-                modifier = Modifier.fillMaxSize().padding(padding)
+    Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
+        Surface(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                LazyColumn {
-                    items(data) { item ->
-                        LinkPropertyListItem(
-                            item,
-                            onFavoriteClick = { favoriteItem ->
-                                viewModel.toggleFavorite(favoriteItem)
-                            },
-                            onShareClick = { itemToShare ->
-                                linkManager.shareLink(itemToShare.url)
-                            },
-                            onDeleteClicked = { itemToDelete ->
-                                viewModel.deleteItem(itemToDelete)
-                            },
-                            onTagClicked = { itemToTag ->
-                                onNavigateToTags(itemToTag)
-                            },
-                            onItemClick = { itemToOpen -> linkManager.openLink(itemToOpen.url) }
-                        )
-                    }
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    placeholder = {
+                        Text(text = "Place your link here")
+                    },
+                    modifier = Modifier.height(50.dp).weight(2f)
+                )
+                TextButton(
+                    onClick = {
+                        viewModel.validateAndGetMetadata(url)
+                        url = ""
+                    },
+                    modifier = Modifier.wrapContentHeight().fillMaxWidth()
+                        .align(Alignment.CenterVertically).weight(1f)
+                        .padding(4.dp)
+                ) {
+                    Text("Add")
                 }
             }
-
-            when (val currentState = state.value) {
-                is MainViewModel.MainScreenState.Success -> data = currentState.linkProperties
-                MainViewModel.MainScreenState.Failure -> {
-                    BeltDialog(
-                        title = "Something went wrong",
-                        content = "Something went wrong. Please try again.",
-                        onDismiss = {
-                            viewModel.backToIdle()
+        }
+    }) { padding ->
+        AnimatedVisibility(
+            data.isNotEmpty(),
+            modifier = Modifier.fillMaxSize().padding(padding)
+        ) {
+            LazyColumn {
+                items(data) { item ->
+                    LinkPropertyListItem(
+                        item,
+                        onFavoriteClick = { favoriteItem ->
+                            viewModel.toggleFavorite(favoriteItem)
                         },
-                        onConfirm = {
-                            viewModel.backToIdle()
-                        }
+                        onShareClick = { itemToShare ->
+                            linkManager.shareLink(itemToShare.url)
+                        },
+                        onDeleteClicked = { itemToDelete ->
+                            viewModel.deleteItem(itemToDelete)
+                        },
+                        onTagClicked = { itemToTag ->
+                            onNavigateToTags(itemToTag)
+                        },
+                        onItemClick = { itemToOpen -> linkManager.openLink(itemToOpen.url) }
                     )
                 }
+            }
+        }
 
-                MainViewModel.MainScreenState.InvalidUrl -> {
-                    BeltDialog(
-                        title = "Invalid URL",
-                        content = "The submitted URL is invalid. Please try another one.",
-                        onDismiss = {
-                            viewModel.backToIdle()
-                        },
-                        onConfirm = {
-                            viewModel.backToIdle()
-                        }
-                    )
-                }
+        when (val currentState = state.value) {
+            is MainViewModel.MainScreenState.Success -> data = currentState.linkProperties
+            MainViewModel.MainScreenState.Failure -> {
+                BeltDialog(
+                    title = "Something went wrong",
+                    content = "Something went wrong. Please try again.",
+                    onDismiss = {
+                        viewModel.backToIdle()
+                    },
+                    onConfirm = {
+                        viewModel.backToIdle()
+                    }
+                )
+            }
 
-                MainViewModel.MainScreenState.Idle -> Unit
-                MainViewModel.MainScreenState.Empty -> Surface(
-                    modifier = Modifier.fillMaxWidth().fillMaxSize()
-                ) {
-                    Text("Implement empty state", color = Color.Black)
-                }
+            MainViewModel.MainScreenState.InvalidUrl -> {
+                BeltDialog(
+                    title = "Invalid URL",
+                    content = "The submitted URL is invalid. Please try another one.",
+                    onDismiss = {
+                        viewModel.backToIdle()
+                    },
+                    onConfirm = {
+                        viewModel.backToIdle()
+                    }
+                )
+            }
+
+            MainViewModel.MainScreenState.Idle -> Unit
+            MainViewModel.MainScreenState.Empty -> Surface(
+                modifier = Modifier.fillMaxWidth().fillMaxSize()
+            ) {
+                Text("Implement empty state", color = Color.Black)
             }
         }
     }

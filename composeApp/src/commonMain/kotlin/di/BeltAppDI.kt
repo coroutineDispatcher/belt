@@ -13,11 +13,14 @@ import model.LinkProperty
 import repository.LinksRepository
 import usecase.AddUrlToDatabaseUseCase
 import usecase.DeleteItemUseCase
+import usecase.GetFilteredTagsUseCase
 import usecase.IsValidUrlUseCase
 import usecase.ObserveLinkPropertiesUseCase
 import usecase.ToggleFavouriteItemUseCase
-import viewmodel.NavigationViewModel
+import usecase.UpdateTagForLinkPropertyUseCase
 import viewmodel.main.MainViewModel
+import viewmodel.navigation.NavigationViewModel
+import viewmodel.tags.TagsViewModel
 
 object BeltAppDI {
     private val realm by lazy {
@@ -31,18 +34,24 @@ object BeltAppDI {
     private val isValidUrlUseCase by lazy { IsValidUrlUseCase(linkRepository) }
     private val addUrlToDatabaseUseCase by lazy { AddUrlToDatabaseUseCase(linkRepository) }
     private val deleteItemUseCase by lazy { DeleteItemUseCase(linkRepository) }
-
-    val mainViewModel by lazy {
-        MainViewModel(
-            addUrlToDatabaseUseCase,
-            isValidUrlUseCase,
-            observeLinkPropertiesUseCase,
-            toggleFavouriteItemUseCase,
-            deleteItemUseCase
+    private val getTagsUseCase by lazy { GetFilteredTagsUseCase(linkRepository) }
+    private val updateTagForLinkPropertyUseCase by lazy {
+        UpdateTagForLinkPropertyUseCase(
+            linkRepository
         )
     }
 
-    val navigationViewModel by lazy { NavigationViewModel() }
+    fun mainViewModel() = MainViewModel(
+        addUrlToDatabaseUseCase,
+        isValidUrlUseCase,
+        observeLinkPropertiesUseCase,
+        toggleFavouriteItemUseCase,
+        deleteItemUseCase
+    )
+
+    fun navigationViewModel() = NavigationViewModel()
+
+    fun tagsViewModel() = TagsViewModel(getTagsUseCase, updateTagForLinkPropertyUseCase)
 
     val kamelConfig = KamelConfig {
         takeFrom(KamelConfig.Default)
