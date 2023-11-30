@@ -16,6 +16,7 @@ import usecase.DeleteItemUseCase
 import usecase.IsValidUrlUseCase
 import usecase.ObserveLinkPropertiesUseCase
 import usecase.ToggleFavouriteItemUseCase
+import viewmodel.NavigationViewModel
 import viewmodel.main.MainViewModel
 
 object BeltAppDI {
@@ -40,6 +41,8 @@ object BeltAppDI {
             deleteItemUseCase
         )
     }
+
+    val navigationViewModel by lazy { NavigationViewModel() }
 
     val kamelConfig = KamelConfig {
         takeFrom(KamelConfig.Default)

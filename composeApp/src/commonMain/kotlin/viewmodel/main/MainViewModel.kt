@@ -36,7 +36,6 @@ class MainViewModel(
         data object InvalidUrl : MainScreenState()
         data class Success(val linkProperties: List<LinkProperty>) : MainScreenState()
         data object Empty : MainScreenState()
-        // TODO Item already exists
     }
 
     init {

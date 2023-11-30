@@ -16,8 +16,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.runtime.Composable
@@ -29,13 +29,17 @@ import androidx.compose.ui.unit.dp
 import io.kamel.core.Resource
 import io.kamel.image.asyncPainterResource
 import model.LinkProperty
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun LinkPropertyListItem(
     item: LinkProperty,
     onFavoriteClick: (LinkProperty) -> Unit,
     onShareClick: (LinkProperty) -> Unit,
-    onMoreClicked: (LinkProperty) -> Unit,
+    onDeleteClicked: (LinkProperty) -> Unit,
+    onTagClicked: (LinkProperty) -> Unit,
     onItemClick: (LinkProperty) -> Unit
 ) {
     Surface(
@@ -90,9 +94,7 @@ fun LinkPropertyListItem(
                 }
             }
 
-            Row {
-                // TODO Tags
-
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(
                     modifier = Modifier.align(Alignment.CenterVertically).weight(1f)
                 ) {
@@ -114,10 +116,17 @@ fun LinkPropertyListItem(
                     }
 
                     IconButton(
-                        onClick = { onMoreClicked(item) },
+                        onClick = { onTagClicked(item) },
                         modifier = Modifier.padding(4.dp)
                     ) {
-                        Icon(Icons.Filled.MoreVert, "Delete")
+                        Icon(painter = painterResource("tag.png"), "Tag")
+                    }
+
+                    IconButton(
+                        onClick = { onDeleteClicked(item) },
+                        modifier = Modifier.padding(4.dp)
+                    ) {
+                        Icon(Icons.Filled.Delete, "Delete")
                     }
                 }
             }
