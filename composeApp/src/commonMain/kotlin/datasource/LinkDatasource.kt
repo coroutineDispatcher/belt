@@ -50,14 +50,8 @@ class LinkDatasource(
         headlines.forEach { element ->
             when (element.attr("property")) {
                 PROPERTY_IMAGE -> {
-                    println("Extracting image: ${element.attr("content")}")
                     linkProperty.image = element.attr("content")
                 }
-
-                PROPERTY_URL -> {
-                    println("Extracting url: ${element.attr("content")}")
-                }
-
                 else -> Unit
             }
         }

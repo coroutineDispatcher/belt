@@ -36,8 +36,6 @@ fun TagListItem(
                 .padding(16.dp)
         )
 
-        println("Should show remove tag button: $showRemoveTagButton")
-
         if (showRemoveTagButton) {
             IconButton(
                 onClick = {

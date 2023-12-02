@@ -22,7 +22,6 @@ import usecase.ObserveLinkPropertiesUseCase
 import usecase.ToggleFavouriteItemUseCase
 import usecase.UpdateTagForLinkPropertyUseCase
 import viewmodel.main.MainViewModel
-import viewmodel.navigation.NavigationViewModel
 import viewmodel.tags.TagsViewModel
 
 object BeltAppDI {
@@ -53,8 +52,6 @@ object BeltAppDI {
         toggleFavouriteItemUseCase,
         deleteItemUseCase
     )
-
-    fun navigationViewModel() = NavigationViewModel()
 
     fun tagsViewModel(linkProperty: LinkProperty) =
         TagsViewModel(

@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +47,6 @@ fun LinkPropertyListItem(
     onTagClicked: (LinkProperty) -> Unit,
     onItemClick: (LinkProperty) -> Unit
 ) {
-    val tags = remember { item.tags.toList() }
     Surface(
         shape = RoundedCornerShape(4.dp),
         elevation = 2.dp,
@@ -101,52 +99,50 @@ fun LinkPropertyListItem(
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                LazyRow(Modifier.weight(1f).padding(4.dp)) {
-                    items(tags) { tag ->
-                        Chip(
-                            onClick = { Unit },
-                            modifier = Modifier.wrapContentSize().padding(2.dp)
-                        ) {
-                            Text(tag)
-                        }
+            LazyRow(Modifier.padding(16.dp)) {
+                items(item.tags) { tag ->
+                    Chip(
+                        onClick = { Unit },
+                        modifier = Modifier.wrapContentSize().padding(2.dp)
+                    ) {
+                        Text(tag)
                     }
                 }
+            }
 
-                Row(
-                    modifier = Modifier.align(Alignment.CenterVertically).weight(1f),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+            Row(
+                modifier = Modifier.align(Alignment.End),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                IconButton(
+                    onClick = { onFavoriteClick(item) },
+                    modifier = Modifier.padding(4.dp)
                 ) {
-                    IconButton(
-                        onClick = { onFavoriteClick(item) },
-                        modifier = Modifier.padding(2.dp)
-                    ) {
-                        val icon =
-                            if (item.favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
+                    val icon =
+                        if (item.favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
 
-                        Icon(icon, "Favorite")
-                    }
+                    Icon(icon, "Favorite")
+                }
 
-                    IconButton(
-                        onClick = { onShareClick(item) },
-                        modifier = Modifier.padding(2.dp)
-                    ) {
-                        Icon(Icons.Filled.Share, "Share")
-                    }
+                IconButton(
+                    onClick = { onShareClick(item) },
+                    modifier = Modifier.padding(4.dp)
+                ) {
+                    Icon(Icons.Filled.Share, "Share")
+                }
 
-                    IconButton(
-                        onClick = { onTagClicked(item) },
-                        modifier = Modifier.padding(2.dp)
-                    ) {
-                        Icon(painter = painterResource("tag.png"), "Tag")
-                    }
+                IconButton(
+                    onClick = { onTagClicked(item) },
+                    modifier = Modifier.padding(4.dp)
+                ) {
+                    Icon(painter = painterResource("tag.png"), "Tag")
+                }
 
-                    IconButton(
-                        onClick = { onDeleteClicked(item) },
-                        modifier = Modifier.padding(2.dp)
-                    ) {
-                        Icon(Icons.Filled.Delete, "Delete")
-                    }
+                IconButton(
+                    onClick = { onDeleteClicked(item) },
+                    modifier = Modifier.padding(4.dp)
+                ) {
+                    Icon(Icons.Filled.Delete, "Delete")
                 }
             }
         }
