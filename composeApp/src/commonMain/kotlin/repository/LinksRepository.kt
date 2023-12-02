@@ -4,6 +4,7 @@ import datasource.LinkDatasource
 import datasource.TagsDatasource
 import io.realm.kotlin.types.RealmUUID
 import model.LinkProperty
+import model.LinkSearchOperation
 import model.LinkTagOperation
 
 class LinksRepository(
@@ -37,5 +38,5 @@ class LinksRepository(
 
     fun getLinkPropertyByIdAsFlow(id: RealmUUID) = linksDatasource.getPropertyById(id)
 
-    val linkPropertiesObserver = linksDatasource.databaseObservable
+    fun linkPropertiesObserver(search: LinkSearchOperation) = linksDatasource.databaseObservable(search)
 }

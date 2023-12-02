@@ -1,18 +1,19 @@
 package ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Chip
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -32,17 +33,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import di.BeltAppDI
 import model.LinkProperty
+import navigation.BackStackHandler
 import viewmodel.tags.TagsViewModel
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
+fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
     val viewModel = remember { BeltAppDI.tagsViewModel(linkToModify) }
     val tagToSearchQuery = remember { mutableStateOf("") }
     val state = viewModel.state.collectAsState()
     val dataTags = remember { mutableStateOf(listOf<String>()) }
     val dataCurrentLinkProperty = remember { mutableStateOf(linkToModify) }
     val interactionSource = remember { MutableInteractionSource() }
-
     DisposableEffect(Unit) {
         onDispose { viewModel.dispose() }
     }
@@ -52,89 +54,94 @@ fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
     }
 
     Scaffold(
+        modifier = Modifier,
         topBar = {
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.padding(8.dp)) {
-                    OutlinedTextField(
-                        value = tagToSearchQuery.value,
-                        onValueChange = {
-                            tagToSearchQuery.value = it
-                        },
-                        placeholder = {
-                            Text(text = "Search or add a new tag")
-                        },
-                        modifier = Modifier.height(56.dp).fillMaxWidth(),
-                        trailingIcon = {
-                            if (tagToSearchQuery.value.isNotEmpty()) {
-                                IconButton(onClick = { tagToSearchQuery.value = "" }) {
-                                    Icon(
-                                        Icons.Filled.Clear,
-                                        "Clear Text"
-                                    )
+            Column(verticalArrangement = Arrangement.SpaceAround) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.padding(16.dp)) {
+                        OutlinedTextField(
+                            value = tagToSearchQuery.value,
+                            onValueChange = {
+                                tagToSearchQuery.value = it
+                            },
+                            placeholder = {
+                                Text(text = "Search or add a new tag")
+                            },
+                            modifier = Modifier.height(56.dp).fillMaxWidth(),
+                            trailingIcon = {
+                                if (tagToSearchQuery.value.isNotEmpty()) {
+                                    IconButton(onClick = { tagToSearchQuery.value = "" }) {
+                                        Icon(
+                                            Icons.Filled.Clear,
+                                            "Clear Text"
+                                        )
+                                    }
                                 }
-                            }
-                        },
-                        interactionSource = interactionSource
-                    )
+                            },
+                            interactionSource = interactionSource
+                        )
+                    }
+                }
+
+                LazyRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    items(dataCurrentLinkProperty.value.tags) { currentTag ->
+                        Chip(onClick = { Unit }, modifier = Modifier.padding(2.dp)) {
+                            Text(modifier = Modifier.padding(8.dp), text = currentTag)
+                        }
+                    }
                 }
             }
         }
     ) { paddingValues ->
-        AnimatedVisibility(
-            visible = true,
-            enter = slideInHorizontally(),
-            exit = slideOutHorizontally()
-        ) {
-            Surface(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    if (!dataTags.value.contains(tagToSearchQuery.value) &&
-                        tagToSearchQuery.value.isNotEmpty()
-                    ) {
-                        item {
-                            TagListItem(
-                                textToDisplay = "Add new tag: ${tagToSearchQuery.value}",
-                                showRemoveTagButton = false,
-                                onRemoveTag = { Unit },
-                                onListItemClicked = {
-                                    if (tagToSearchQuery.value.isEmpty()) return@TagListItem
-                                    viewModel.addTagToItem(
-                                        dataCurrentLinkProperty.value,
-                                        tagToSearchQuery.value,
-                                        then = { onNavigateToMainScreen() }
-                                    )
-                                }
-                            )
-                        }
-                    }
-
-                    items(dataTags.value) { tag ->
+        Surface(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                if (!dataTags.value.contains(tagToSearchQuery.value) &&
+                    tagToSearchQuery.value.isNotEmpty()
+                ) {
+                    item {
                         TagListItem(
-                            textToDisplay = tag,
-                            showRemoveTagButton = dataCurrentLinkProperty.value.tags.contains(tag),
+                            textToDisplay = "Add new tag: ${tagToSearchQuery.value}",
+                            showRemoveTagButton = false,
+                            onRemoveTag = { Unit },
                             onListItemClicked = {
-                                if (tag.isEmpty()) return@TagListItem
+                                if (tagToSearchQuery.value.isEmpty()) return@TagListItem
                                 viewModel.addTagToItem(
                                     dataCurrentLinkProperty.value,
-                                    tag,
-                                    then = { onNavigateToMainScreen() }
-                                )
-                            },
-                            onRemoveTag = {
-                                viewModel.removeTagFromLinkProperty(
-                                    dataCurrentLinkProperty.value,
-                                    tag
+                                    tagToSearchQuery.value,
+                                    then = { backStackHandler.popToLast() }
                                 )
                             }
                         )
                     }
                 }
+
+                items(dataTags.value) { tag ->
+                    TagListItem(
+                        textToDisplay = tag,
+                        showRemoveTagButton = dataCurrentLinkProperty.value.tags.contains(tag),
+                        onListItemClicked = {
+                            if (tag.isEmpty()) return@TagListItem
+                            viewModel.addTagToItem(
+                                dataCurrentLinkProperty.value,
+                                tag,
+                                then = { backStackHandler.popToLast() }
+                            )
+                        },
+                        onRemoveTag = {
+                            viewModel.removeTagFromLinkProperty(
+                                dataCurrentLinkProperty.value,
+                                tag
+                            )
+                        }
+                    )
+                }
             }
         }
         when (val currentState = state.value) {
-            TagsViewModel.TagsState.Finish -> onNavigateToMainScreen()
+            TagsViewModel.TagsState.Finish -> backStackHandler.popToLast()
             TagsViewModel.TagsState.Idle -> Unit
             is TagsViewModel.TagsState.Success -> {
                 dataTags.value = currentState.tags

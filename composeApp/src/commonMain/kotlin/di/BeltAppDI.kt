@@ -50,16 +50,16 @@ object BeltAppDI {
         isValidUrlUseCase,
         observeLinkPropertiesUseCase,
         toggleFavouriteItemUseCase,
-        deleteItemUseCase
+        deleteItemUseCase,
+        getTagsUseCase
     )
 
-    fun tagsViewModel(linkProperty: LinkProperty) =
-        TagsViewModel(
-            getTagsUseCase,
-            updateTagForLinkPropertyUseCase,
-            linkProperty,
-            getLinkPropertyUseCase
-        )
+    fun tagsViewModel(linkProperty: LinkProperty) = TagsViewModel(
+        getTagsUseCase,
+        updateTagForLinkPropertyUseCase,
+        linkProperty,
+        getLinkPropertyUseCase
+    )
 
     val kamelConfig = KamelConfig {
         takeFrom(KamelConfig.Default)

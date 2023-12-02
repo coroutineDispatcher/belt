@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import model.LinkProperty
+import model.LinkSearchOperation
 import model.LinkTagOperation
 
 private const val PROPERTY_TITLE = "og:title"
@@ -25,10 +26,21 @@ class LinkDatasource(
     private val httpClient: HttpClient,
     private val realm: Realm
 ) {
-
-    val databaseObservable: Flow<List<LinkProperty>> =
+    fun databaseObservable(search: LinkSearchOperation) =
         realm.query<LinkProperty>().asFlow().map { changes ->
-            changes.list.reversed()
+            changes.list
+                .filter {
+                    when (search) {
+                        is LinkSearchOperation.SearchByTitle -> {
+                            if (search.query.isEmpty()) true else it.title.contains(search.query)
+                        }
+
+                        is LinkSearchOperation.SearchByTag -> {
+                            if (search.tag.isEmpty()) true else it.tags.contains(search.tag)
+                        }
+                    }
+                }
+                .reversed()
         }
 
     fun getPropertyById(id: RealmUUID): Flow<LinkProperty> =

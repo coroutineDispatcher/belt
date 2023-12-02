@@ -1,5 +1,12 @@
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.with
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -11,6 +18,7 @@ import theme.AppTheme
 import ui.MainScreen
 import ui.TagsScreen
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun App(onAppExit: () -> Unit) {
     val backStackHandler = remember { BackStackHandler(initialScreen = Navigation.MainScreen) }
@@ -29,26 +37,34 @@ fun App(onAppExit: () -> Unit) {
     }
 
     AppTheme {
-        when (val state = navigationState.value) {
-            Navigation.MainScreen -> AnimatedVisibility(true, enter = slideInHorizontally()) {
-                MainScreen(
-                    onNavigateToTags = { linkProperty ->
-                        backStackHandler.add(
-                            Navigation.TagsScreen(
-                                linkProperty
-                            )
-                        )
+        Surface {
+            AnimatedContent(
+                targetState = navigationState.value,
+                transitionSpec = {
+                    if (targetState == Navigation.MainScreen) {
+                        slideInHorizontally(initialOffsetX = { width -> -width }) + fadeIn() with slideOutHorizontally(
+                            targetOffsetX = { width -> width }
+                        ) + fadeOut()
+                    } else {
+                        slideInHorizontally(initialOffsetX = { width -> width }) +
+                            fadeIn() with slideOutHorizontally(targetOffsetX = { width -> -width }) + fadeOut()
+                    }.using(
+                        SizeTransform(clip = false)
+                    )
+                }
+            ) {
+                when (val state = navigationState.value) {
+                    Navigation.MainScreen -> {
+                        MainScreen(backStackHandler)
                     }
-                )
-            }
 
-            is Navigation.TagsScreen -> {
-                TagsScreen(state.linkToModify, onNavigateToMainScreen = {
-                    backStackHandler.popToLast()
-                })
-            }
+                    is Navigation.TagsScreen -> {
+                        TagsScreen(state.linkToModify, backStackHandler)
+                    }
 
-            null -> onAppExit()
+                    null -> onAppExit()
+                }
+            }
         }
     }
 }

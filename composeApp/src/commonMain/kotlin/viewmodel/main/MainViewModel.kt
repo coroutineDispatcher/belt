@@ -2,15 +2,22 @@ package viewmodel.main
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import model.LinkProperty
+import model.LinkSearchOperation
 import usecase.AddUrlToDatabaseUseCase
 import usecase.DeleteItemUseCase
+import usecase.GetFilteredTagsUseCase
 import usecase.IsValidUrlUseCase
 import usecase.ObserveLinkPropertiesUseCase
 import usecase.ToggleFavouriteItemUseCase
@@ -21,40 +28,58 @@ class MainViewModel(
     private val isValidURLUseCase: IsValidUrlUseCase,
     private val observeLinkPropertiesUseCase: ObserveLinkPropertiesUseCase,
     private val toggleFavouriteItemUseCase: ToggleFavouriteItemUseCase,
-    private val deleteItemUseCase: DeleteItemUseCase
+    private val deleteItemUseCase: DeleteItemUseCase,
+    private val getFilteredTagsUseCase: GetFilteredTagsUseCase
 ) : ViewModel {
-
     private val viewModelJob = SupervisorJob()
     override val viewModelScope: CoroutineScope =
         CoroutineScope(viewModelJob + Dispatchers.Main.immediate)
-    private val _state = MutableStateFlow<MainScreenState>(MainScreenState.Idle)
-    val state = _state.asStateFlow()
+    private val linkSearch = MutableSharedFlow<LinkSearchOperation>()
+    private val errorOrIdleState = MutableStateFlow<MainScreenState?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val state: StateFlow<MainScreenState> = linkSearch.flatMapLatest { linkSearchOperation ->
+        combine(
+            getFilteredTagsUseCase(""),
+            observeLinkPropertiesUseCase(linkSearchOperation),
+            errorOrIdleState
+        ) { tags, linkProperties, errorOrIdleState ->
+            Triple(tags, linkProperties, errorOrIdleState)
+        }
+    }.map { triple ->
+        if (triple.third != null) {
+            checkNotNull(triple.third)
+        } else {
+            MainScreenState.Success(
+                tags = triple.first.map { it.name },
+                linkProperties = triple.second
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, MainScreenState.Idle)
 
     sealed class MainScreenState {
         data object Idle : MainScreenState()
         data object Failure : MainScreenState()
         data object InvalidUrl : MainScreenState()
-        data class Success(val linkProperties: List<LinkProperty>) : MainScreenState()
+        data class Success(val tags: List<String>, val linkProperties: List<LinkProperty>) :
+            MainScreenState()
+
         data object Empty : MainScreenState()
     }
 
     init {
-        viewModelScope.launch {
-            observeLinkPropertiesUseCase().collectLatest { linkPropertiesResult ->
-                _state.update { MainScreenState.Success(linkPropertiesResult) }
-            }
-        }
+        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTitle("")) }
     }
 
     fun validateAndGetMetadata(url: String) {
         viewModelScope.launch {
             if (!isValidURLUseCase(url)) {
-                _state.update { MainScreenState.InvalidUrl }
+                errorOrIdleState.emit(MainScreenState.InvalidUrl)
             } else {
                 try {
                     addUrlToDbUseCase(url)
                 } catch (exception: Exception) {
-                    _state.update { MainScreenState.Failure }
+                    errorOrIdleState.emit(MainScreenState.Failure)
                 }
             }
         }
@@ -72,7 +97,19 @@ class MainViewModel(
         viewModelScope.launch { deleteItemUseCase(item) }
     }
 
+    fun filterTag(tag: String) {
+        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTag(tag)) }
+    }
+
     override fun backToIdle() {
-        _state.update { MainScreenState.Idle }
+        viewModelScope.launch { errorOrIdleState.emit(MainScreenState.Idle) }
+    }
+
+    fun searchByQuery(searchQuery: String) {
+        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTitle(searchQuery)) }
+    }
+
+    fun searchByTag(clickedTag: String) {
+        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTag(clickedTag)) }
     }
 }
