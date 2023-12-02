@@ -4,10 +4,22 @@ import ComposeApp
 
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        let viewController = MainViewControllerKt.MainViewController()
+        let swipeBackGesture = UISwipeGestureRecognizer(target: viewController, action: #selector(viewController.handleSwipe(_:)))
+        swipeBackGesture.direction = .right
+        viewController.view.addGestureRecognizer(swipeBackGesture)
+        return viewController
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
+extension UIViewController {
+    @objc func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
+        if gesture.direction == .right {
+            BackGestureListenerKt.backGesture()
+        }
+    }
 }
 
 struct ContentView: View {

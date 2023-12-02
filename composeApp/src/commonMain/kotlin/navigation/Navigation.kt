@@ -1,3 +1,5 @@
+package navigation
+
 import model.LinkProperty
 
 sealed class Navigation {

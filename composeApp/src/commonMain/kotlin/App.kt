@@ -1,12 +1,12 @@
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.collectLatest
 import navigation.BackStackHandler
+import navigation.Navigation
 import theme.AppTheme
 import ui.MainScreen
 import ui.TagsScreen
@@ -20,7 +20,10 @@ fun App(onAppExit: () -> Unit) {
     LaunchedEffect(eventBus) {
         eventBus.events.collectLatest { event ->
             when (event) {
-                EventBus.Event.OnBackPressed -> backStackHandler.popBackStack()
+                EventBus.Event.OnBackPressed -> {
+                    if (platform() == iOS && backStackHandler.initialState()) return@collectLatest
+                    backStackHandler.popBackStack()
+                }
             }
         }
     }
@@ -39,13 +42,9 @@ fun App(onAppExit: () -> Unit) {
                 )
             }
 
-            is Navigation.TagsScreen -> AnimatedVisibility(
-                true,
-                enter = slideInHorizontally(),
-                exit = slideOutHorizontally()
-            ) {
+            is Navigation.TagsScreen -> {
                 TagsScreen(state.linkToModify, onNavigateToMainScreen = {
-                    backStackHandler.add(Navigation.MainScreen)
+                    backStackHandler.popToLast()
                 })
             }
 

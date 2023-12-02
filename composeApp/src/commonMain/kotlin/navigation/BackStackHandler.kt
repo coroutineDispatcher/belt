@@ -1,10 +1,9 @@
 package navigation
 
-import Navigation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class BackStackHandler(initialScreen: Navigation) {
+class BackStackHandler(private val initialScreen: Navigation) {
     private val backStack = mutableListOf<Navigation>()
     private val _currentNav = MutableStateFlow<Navigation?>(current())
     val navigation = _currentNav.asStateFlow()
@@ -35,4 +34,13 @@ class BackStackHandler(initialScreen: Navigation) {
         backStack.clear()
         update()
     }
+
+    fun popToLast() {
+        backStack.firstOrNull()?.let { lastItem ->
+            backStack.removeAll { it != lastItem }
+            update()
+        }
+    }
+
+    fun initialState(): Boolean = current() == initialScreen
 }

@@ -1,5 +1,8 @@
 package ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,12 +20,10 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,9 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import di.BeltAppDI
-import iOS
 import model.LinkProperty
-import platform
 import viewmodel.tags.TagsViewModel
 
 @Composable
@@ -58,14 +57,6 @@ fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (platform() == iOS) {
-                    IconButton(
-                        onClick = { onNavigateToMainScreen() },
-                        modifier = Modifier.padding(start = 8.dp)
-                    ) {
-                        Icon(Icons.Filled.ArrowBack, "Back")
-                    }
-                }
                 Box(modifier = Modifier.padding(8.dp)) {
                     OutlinedTextField(
                         value = tagToSearchQuery.value,
@@ -92,51 +83,56 @@ fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
             }
         }
     ) { paddingValues ->
-        Surface(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                if (!dataTags.value.contains(tagToSearchQuery.value) &&
-                    tagToSearchQuery.value.isNotEmpty()
-                ) {
-                    item {
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInHorizontally(),
+            exit = slideOutHorizontally()
+        ) {
+            Surface(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    if (!dataTags.value.contains(tagToSearchQuery.value) &&
+                        tagToSearchQuery.value.isNotEmpty()
+                    ) {
+                        item {
+                            TagListItem(
+                                textToDisplay = "Add new tag: ${tagToSearchQuery.value}",
+                                showRemoveTagButton = false,
+                                onRemoveTag = { Unit },
+                                onListItemClicked = {
+                                    if (tagToSearchQuery.value.isEmpty()) return@TagListItem
+                                    viewModel.addTagToItem(
+                                        dataCurrentLinkProperty.value,
+                                        tagToSearchQuery.value,
+                                        then = { onNavigateToMainScreen() }
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    items(dataTags.value) { tag ->
                         TagListItem(
-                            textToDisplay = "Add new tag: ${tagToSearchQuery.value}",
-                            showRemoveTagButton = false,
-                            onRemoveTag = { Unit },
+                            textToDisplay = tag,
+                            showRemoveTagButton = dataCurrentLinkProperty.value.tags.contains(tag),
                             onListItemClicked = {
-                                if (tagToSearchQuery.value.isEmpty()) return@TagListItem
+                                if (tag.isEmpty()) return@TagListItem
                                 viewModel.addTagToItem(
                                     dataCurrentLinkProperty.value,
-                                    tagToSearchQuery.value,
+                                    tag,
                                     then = { onNavigateToMainScreen() }
+                                )
+                            },
+                            onRemoveTag = {
+                                viewModel.removeTagFromLinkProperty(
+                                    dataCurrentLinkProperty.value,
+                                    tag
                                 )
                             }
                         )
                     }
                 }
-
-                items(dataTags.value) { tag ->
-                    TagListItem(
-                        textToDisplay = tag,
-                        showRemoveTagButton = dataCurrentLinkProperty.value.tags.contains(tag),
-                        onListItemClicked = {
-                            if (tag.isEmpty()) return@TagListItem
-                            viewModel.addTagToItem(
-                                dataCurrentLinkProperty.value,
-                                tag,
-                                then = { onNavigateToMainScreen() }
-                            )
-                        },
-                        onRemoveTag = {
-                            viewModel.removeTagFromLinkProperty(
-                                dataCurrentLinkProperty.value,
-                                tag
-                            )
-                        }
-                    )
-                }
             }
         }
-
         when (val currentState = state.value) {
             TagsViewModel.TagsState.Finish -> onNavigateToMainScreen()
             TagsViewModel.TagsState.Idle -> Unit
