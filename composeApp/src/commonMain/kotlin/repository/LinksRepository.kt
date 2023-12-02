@@ -1,11 +1,14 @@
 package repository
 
 import datasource.LinkDatasource
+import datasource.TagsDatasource
+import io.realm.kotlin.types.RealmUUID
 import model.LinkProperty
 import model.LinkTagOperation
 
 class LinksRepository(
-    private val linksDatasource: LinkDatasource
+    private val linksDatasource: LinkDatasource,
+    private val tagsDatasource: TagsDatasource
 ) {
     suspend fun tryAddToDb(url: String) = linksDatasource.tryAddToDb(url)
     fun isValidUrl(url: String): Boolean {
@@ -19,15 +22,20 @@ class LinksRepository(
 
     suspend fun deleteItem(linkProperty: LinkProperty) = linksDatasource.deleteItem(linkProperty)
 
-    fun filteredTags(filter: String = "") = linksDatasource.tagsObservable(filter)
+    fun filteredTags(filter: String = "") = tagsDatasource.tagsObservable(filter)
 
     suspend fun updateTagForLinkProperty(
         linkProperty: LinkProperty,
         newTag: String,
         operation: LinkTagOperation
     ) {
+        if (operation == LinkTagOperation.Add) {
+            tagsDatasource.addNewTag(newTag)
+        }
         linksDatasource.updateTag(linkProperty, newTag, operation)
     }
+
+    fun getLinkPropertyByIdAsFlow(id: RealmUUID) = linksDatasource.getPropertyById(id)
 
     val linkPropertiesObserver = linksDatasource.databaseObservable
 }

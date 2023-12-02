@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,15 +23,12 @@ fun TagListItem(
     onListItemClicked: () -> Unit,
     onRemoveTag: () -> Unit
 ) {
-    val showRemoveTagButton = remember { showRemoveTagButton }
-
     Row(horizontalArrangement = Arrangement.SpaceEvenly) {
         Text(
             text = textToDisplay,
             style = MaterialTheme.typography.body1,
             fontWeight = FontWeight.Light,
             modifier = Modifier
-                .padding(8.dp)
                 .clickable {
                     onListItemClicked()
                 }
@@ -44,7 +40,6 @@ fun TagListItem(
 
         if (showRemoveTagButton) {
             IconButton(
-                modifier = Modifier.padding(start = 16.dp),
                 onClick = {
                     onRemoveTag()
                 }

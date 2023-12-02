@@ -31,16 +31,8 @@ class LinkDatasource(
             changes.list.reversed()
         }
 
-    fun tagsObservable(filter: String): Flow<List<String>> =
-        realm.query<LinkProperty>().asFlow().map { changes ->
-            changes.list.reversed().map { it.tags }.flatten().filter { tag ->
-                if (filter.isEmpty()) {
-                    true
-                } else {
-                    tag.contains(filter)
-                }
-            }
-        }
+    fun getPropertyById(id: RealmUUID): Flow<LinkProperty> =
+        realm.query<LinkProperty>("id == $0", id).find().asFlow().map { it.list.first() }
 
     suspend fun tryAddToDb(newUrl: String): Unit = withContext(Dispatchers.IO) {
         val response = httpClient.get(newUrl)

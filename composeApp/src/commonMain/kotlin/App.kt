@@ -1,6 +1,3 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember

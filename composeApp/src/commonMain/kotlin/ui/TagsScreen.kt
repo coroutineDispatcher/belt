@@ -24,10 +24,11 @@ import viewmodel.tags.TagsViewModel
 
 @Composable
 fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
-    val viewModel = remember { BeltAppDI.tagsViewModel() }
+    val viewModel = remember { BeltAppDI.tagsViewModel(linkToModify) }
     val tagToSearchQuery = remember { mutableStateOf("") }
     val state = viewModel.state.collectAsState()
-    val data = remember { mutableStateOf(listOf<String>()) }
+    val dataTags = remember { mutableStateOf(listOf<String>()) }
+    val dataCurrentLinkProperty = remember { mutableStateOf(linkToModify) }
 
     DisposableEffect(Unit) {
         onDispose { viewModel.dispose() }
@@ -52,7 +53,7 @@ fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
     ) { paddingValues ->
         Surface(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                if (!data.value.contains(tagToSearchQuery.value) &&
+                if (!dataTags.value.contains(tagToSearchQuery.value) &&
                     tagToSearchQuery.value.isNotEmpty()
                 ) {
                     item {
@@ -63,7 +64,7 @@ fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
                             onListItemClicked = {
                                 if (tagToSearchQuery.value.isEmpty()) return@TagListItem
                                 viewModel.addTagToItem(
-                                    linkToModify,
+                                    dataCurrentLinkProperty.value,
                                     tagToSearchQuery.value,
                                     then = { onNavigateToMainScreen() }
                                 )
@@ -72,19 +73,24 @@ fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
                     }
                 }
 
-                items(data.value) { tag ->
+                items(dataTags.value) { tag ->
                     TagListItem(
                         textToDisplay = tag,
-                        showRemoveTagButton = linkToModify.tags.contains(tag),
+                        showRemoveTagButton = dataCurrentLinkProperty.value.tags.contains(tag),
                         onListItemClicked = {
                             if (tag.isEmpty()) return@TagListItem
                             viewModel.addTagToItem(
-                                linkToModify,
+                                dataCurrentLinkProperty.value,
                                 tag,
                                 then = { onNavigateToMainScreen() }
                             )
                         },
-                        onRemoveTag = { viewModel.removeTagFromLinkProperty(linkToModify, tag) }
+                        onRemoveTag = {
+                            viewModel.removeTagFromLinkProperty(
+                                dataCurrentLinkProperty.value,
+                                tag
+                            )
+                        }
                     )
                 }
             }
@@ -93,7 +99,10 @@ fun TagsScreen(linkToModify: LinkProperty, onNavigateToMainScreen: () -> Unit) {
         when (val currentState = state.value) {
             TagsViewModel.TagsState.Finish -> onNavigateToMainScreen()
             TagsViewModel.TagsState.Idle -> Unit
-            is TagsViewModel.TagsState.Success -> data.value = currentState.tags
+            is TagsViewModel.TagsState.Success -> {
+                dataTags.value = currentState.tags
+                dataCurrentLinkProperty.value = currentState.linkProperty
+            }
         }
     }
 }

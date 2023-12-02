@@ -1,6 +1,7 @@
 package di
 
 import datasource.LinkDatasource
+import datasource.TagsDatasource
 import io.kamel.core.config.DefaultCacheSize
 import io.kamel.core.config.KamelConfig
 import io.kamel.core.config.takeFrom
@@ -10,10 +11,12 @@ import io.ktor.client.HttpClient
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import model.LinkProperty
+import model.Tag
 import repository.LinksRepository
 import usecase.AddUrlToDatabaseUseCase
 import usecase.DeleteItemUseCase
 import usecase.GetFilteredTagsUseCase
+import usecase.GetLinkPropertyUseCase
 import usecase.IsValidUrlUseCase
 import usecase.ObserveLinkPropertiesUseCase
 import usecase.ToggleFavouriteItemUseCase
@@ -24,11 +27,12 @@ import viewmodel.tags.TagsViewModel
 
 object BeltAppDI {
     private val realm by lazy {
-        Realm.open(RealmConfiguration.create(schema = setOf(LinkProperty::class)))
+        Realm.open(RealmConfiguration.create(schema = setOf(LinkProperty::class, Tag::class)))
     }
     private val httpClient by lazy { HttpClient() }
     private val linkDatasource by lazy { LinkDatasource(httpClient, realm) }
-    private val linkRepository by lazy { LinksRepository(linkDatasource) }
+    private val tagsDatasource by lazy { TagsDatasource(realm) }
+    private val linkRepository by lazy { LinksRepository(linkDatasource, tagsDatasource) }
     private val toggleFavouriteItemUseCase by lazy { ToggleFavouriteItemUseCase(linkRepository) }
     private val observeLinkPropertiesUseCase by lazy { ObserveLinkPropertiesUseCase(linkRepository) }
     private val isValidUrlUseCase by lazy { IsValidUrlUseCase(linkRepository) }
@@ -40,6 +44,7 @@ object BeltAppDI {
             linkRepository
         )
     }
+    private val getLinkPropertyUseCase by lazy { GetLinkPropertyUseCase(linkRepository) }
 
     fun mainViewModel() = MainViewModel(
         addUrlToDatabaseUseCase,
@@ -51,7 +56,13 @@ object BeltAppDI {
 
     fun navigationViewModel() = NavigationViewModel()
 
-    fun tagsViewModel() = TagsViewModel(getTagsUseCase, updateTagForLinkPropertyUseCase)
+    fun tagsViewModel(linkProperty: LinkProperty) =
+        TagsViewModel(
+            getTagsUseCase,
+            updateTagForLinkPropertyUseCase,
+            linkProperty,
+            getLinkPropertyUseCase
+        )
 
     val kamelConfig = KamelConfig {
         takeFrom(KamelConfig.Default)
