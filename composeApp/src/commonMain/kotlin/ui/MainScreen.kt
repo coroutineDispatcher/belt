@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -129,9 +128,11 @@ fun MainScreen(
 
                 LazyRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     items(tags) { currentTag ->
-                        Chip(onClick = { viewModel.searchByTag(currentTag) }, modifier = Modifier.padding(2.dp)) {
-                            Text(modifier = Modifier.padding(8.dp), text = currentTag)
-                        }
+                        DarkeningChip(
+                            currentTag = currentTag,
+                            onFirstClick = { viewModel.searchByTag(currentTag) },
+                            onSecondClick = { viewModel.removeTagFromFilter(currentTag) }
+                        )
                     }
                 }
             }

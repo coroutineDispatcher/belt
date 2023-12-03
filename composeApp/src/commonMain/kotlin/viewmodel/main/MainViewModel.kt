@@ -1,5 +1,6 @@
 package viewmodel.main
 
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import model.LinkProperty
-import model.LinkSearchOperation
+import model.Search
 import usecase.AddUrlToDatabaseUseCase
 import usecase.DeleteItemUseCase
 import usecase.GetFilteredTagsUseCase
@@ -34,8 +35,9 @@ class MainViewModel(
     private val viewModelJob = SupervisorJob()
     override val viewModelScope: CoroutineScope =
         CoroutineScope(viewModelJob + Dispatchers.Main.immediate)
-    private val linkSearch = MutableSharedFlow<LinkSearchOperation>()
+    private val linkSearch = MutableSharedFlow<Search>()
     private val errorOrIdleState = MutableStateFlow<MainScreenState?>(null)
+    private val search = mutableStateOf(Search())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<MainScreenState> = linkSearch.flatMapLatest { linkSearchOperation ->
@@ -68,7 +70,7 @@ class MainViewModel(
     }
 
     init {
-        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTitle("")) }
+        viewModelScope.launch { linkSearch.emit(search.value) }
     }
 
     fun validateAndGetMetadata(url: String) {
@@ -97,19 +99,22 @@ class MainViewModel(
         viewModelScope.launch { deleteItemUseCase(item) }
     }
 
-    fun filterTag(tag: String) {
-        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTag(tag)) }
-    }
-
     override fun backToIdle() {
         viewModelScope.launch { errorOrIdleState.emit(MainScreenState.Idle) }
     }
 
     fun searchByQuery(searchQuery: String) {
-        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTitle(searchQuery)) }
+        search.value = search.value.copy(searchQuery = searchQuery)
+        viewModelScope.launch { linkSearch.emit(search.value) }
     }
 
     fun searchByTag(clickedTag: String) {
-        viewModelScope.launch { linkSearch.emit(LinkSearchOperation.SearchByTag(clickedTag)) }
+        search.value = search.value.copy(tags = search.value.tags + clickedTag)
+        viewModelScope.launch { linkSearch.emit(search.value) }
+    }
+
+    fun removeTagFromFilter(tag: String) {
+        search.value = search.value.copy(tags = search.value.tags - tag)
+        viewModelScope.launch { linkSearch.emit(search.value) }
     }
 }

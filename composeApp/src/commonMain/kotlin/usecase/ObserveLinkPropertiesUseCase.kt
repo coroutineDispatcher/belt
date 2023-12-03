@@ -1,10 +1,10 @@
 package usecase
 
-import model.LinkSearchOperation
+import model.Search
 import repository.LinksRepository
 
 class ObserveLinkPropertiesUseCase(
     private val repository: LinksRepository
 ) {
-    operator fun invoke(search: LinkSearchOperation) = repository.linkPropertiesObserver(search)
+    operator fun invoke(search: Search) = repository.linkPropertiesObserver(search)
 }
