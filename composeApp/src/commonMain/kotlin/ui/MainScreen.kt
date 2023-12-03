@@ -55,7 +55,7 @@ fun MainScreen(
     var searchQuery by remember { mutableStateOf("") }
     val interactionSource = remember { MutableInteractionSource() }
     var dataTags by remember { mutableStateOf(listOf<String>()) }
-    var dataLinkSearchProperties by remember { mutableStateOf(LinkSearchProperty.entries - LinkSearchProperty.None) }
+    val dataLinkSearchProperties by remember { mutableStateOf(LinkSearchProperty.entries - LinkSearchProperty.None) }
     val state = viewModel.state.collectAsState()
 
     DisposableEffect(Unit) {
