@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import di.BeltAppDI
 import linkManager
 import model.LinkProperty
+import model.LinkSearchProperty
 import navigation.BackStackHandler
 import navigation.Navigation
 import viewmodel.main.MainViewModel
@@ -53,7 +54,8 @@ fun MainScreen(
     var data by remember { mutableStateOf(emptyList<LinkProperty>()) }
     var searchQuery by remember { mutableStateOf("") }
     val interactionSource = remember { MutableInteractionSource() }
-    var tags by remember { mutableStateOf(listOf<String>()) }
+    var dataTags by remember { mutableStateOf(listOf<String>()) }
+    var dataLinkSearchProperties by remember { mutableStateOf(LinkSearchProperty.entries - LinkSearchProperty.None) }
     val state = viewModel.state.collectAsState()
 
     DisposableEffect(Unit) {
@@ -127,7 +129,17 @@ fun MainScreen(
                 }
 
                 LazyRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                    items(tags) { currentTag ->
+                    items(dataLinkSearchProperties) { linkSearchProperty ->
+                        DarkeningChip(
+                            currentTag = "${linkSearchProperty.emoji} ${linkSearchProperty.name}",
+                            onFirstClick = { viewModel.searchByLinkProperty(linkSearchProperty) },
+                            onSecondClick = { viewModel.clearSearchProperty() }
+                        )
+                    }
+                }
+
+                LazyRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    items(dataTags) { currentTag ->
                         DarkeningChip(
                             currentTag = currentTag,
                             onFirstClick = { viewModel.searchByTag(currentTag) },
@@ -163,7 +175,7 @@ fun MainScreen(
             when (val currentState = state.value) {
                 is MainViewModel.MainScreenState.Success -> {
                     data = currentState.linkProperties
-                    tags = currentState.tags
+                    dataTags = currentState.tags
                 }
 
                 MainViewModel.MainScreenState.Failure -> {

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import model.LinkProperty
+import model.LinkSearchProperty
 import model.Search
 import usecase.AddUrlToDatabaseUseCase
 import usecase.DeleteItemUseCase
@@ -115,6 +116,16 @@ class MainViewModel(
 
     fun removeTagFromFilter(tag: String) {
         search.value = search.value.copy(tags = search.value.tags - tag)
+        viewModelScope.launch { linkSearch.emit(search.value) }
+    }
+
+    fun searchByLinkProperty(linkSearchProperty: LinkSearchProperty) {
+        search.value = search.value.copy(property = linkSearchProperty)
+        viewModelScope.launch { linkSearch.emit(search.value) }
+    }
+
+    fun clearSearchProperty() {
+        search.value = search.value.copy(property = LinkSearchProperty.None)
         viewModelScope.launch { linkSearch.emit(search.value) }
     }
 }

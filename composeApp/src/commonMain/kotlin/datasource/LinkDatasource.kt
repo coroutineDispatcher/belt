@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import model.LinkProperty
+import model.LinkSearchProperty
 import model.LinkTagOperation
 import model.Search
 
@@ -31,7 +32,13 @@ class LinkDatasource(
             .map { changes ->
                 changes.list.reversed().filter { item ->
                     val titleMatch = item.title.contains(search.searchQuery, ignoreCase = true)
-                    titleMatch && item.tags.containsAll(search.tags)
+                    val propertiesMatch = when (search.property) {
+                        LinkSearchProperty.Favorite -> item.favorite
+                        LinkSearchProperty.Tagged -> item.tags.isNotEmpty()
+                        else -> true
+                    }
+
+                    titleMatch && item.tags.containsAll(search.tags) && propertiesMatch
                 }
             }
     }
