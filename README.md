@@ -39,3 +39,19 @@ or android native libs.
   I would like the links to be stored somewhere on the cloud. Let's see if I find a nice and cheap
   solution to make it online for everyone.
 - Add more info to the saved links like date and time of creation or their update.
+- Some basic builds using Github actions to insure better continuous development/continuous
+  integration
+- Empty state screens
+
+# Testing
+No tests are written whatsoever. Changes to come in the future, mostly unit tests and screenshot 
+testing.
+
+# App Screenshots
+
+![Screenshot_20231203_142233.png](Screenshot_20231203_142233.png)
+![Screenshot_20231203_142245.png](Screenshot_20231203_142245.png)
+![Simulator Screenshot - iPhone 15 - 2023-12-03 at 14.08.54.png](Simulator%20Screenshot%20-%20iPhone%2015%20-%202023-12-03%20at%2014.08.54.png)
+![Simulator Screenshot - iPhone 15 - 2023-12-03 at 14.09.05.png](Simulator%20Screenshot%20-%20iPhone%2015%20-%202023-12-03%20at%2014.09.05.png)
+![Simulator Screenshot - iPhone 15 - 2023-12-03 at 14.09.13.png](Simulator%20Screenshot%20-%20iPhone%2015%20-%202023-12-03%20at%2014.09.13.png)
+![Simulator Screenshot - iPhone 15 - 2023-12-03 at 14.09.22.png](Simulator%20Screenshot%20-%20iPhone%2015%20-%202023-12-03%20at%2014.09.22.png)
