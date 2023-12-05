@@ -23,6 +23,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        instance = this
+
         backCallback?.let {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 onBackInvokedDispatcher.registerOnBackInvokedCallback(
@@ -50,6 +52,11 @@ class MainActivity : ComponentActivity() {
                 onBackInvokedDispatcher.unregisterOnBackInvokedCallback(it)
             }
         }
+        instance = null
+    }
+
+    companion object {
+        var instance: MainActivity? = null
     }
 }
 
