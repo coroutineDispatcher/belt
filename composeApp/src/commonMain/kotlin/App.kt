@@ -5,7 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,12 +42,12 @@ fun App(onAppExit: () -> Unit) {
                 targetState = navigationState.value,
                 transitionSpec = {
                     if (targetState == Navigation.MainScreen) {
-                        slideInHorizontally(initialOffsetX = { width -> -width }) + fadeIn() with slideOutHorizontally(
+                        slideInHorizontally(initialOffsetX = { width -> -width }) + fadeIn() togetherWith slideOutHorizontally(
                             targetOffsetX = { width -> width }
                         ) + fadeOut()
                     } else {
                         slideInHorizontally(initialOffsetX = { width -> width }) +
-                            fadeIn() with slideOutHorizontally(targetOffsetX = { width -> -width }) + fadeOut()
+                            fadeIn() togetherWith slideOutHorizontally(targetOffsetX = { width -> -width }) + fadeOut()
                     }.using(
                         SizeTransform(clip = false)
                     )
