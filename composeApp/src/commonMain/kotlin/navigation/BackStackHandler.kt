@@ -3,7 +3,7 @@ package navigation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class BackStackHandler(private val initialScreen: Navigation) {
+class BackStackHandler(val initialScreen: Navigation) {
     private val backStack = mutableListOf<Navigation>()
     private val _currentNav = MutableStateFlow<Navigation?>(current())
     val navigation = _currentNav.asStateFlow()

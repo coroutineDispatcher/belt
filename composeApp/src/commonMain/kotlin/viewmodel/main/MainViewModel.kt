@@ -17,22 +17,19 @@ import kotlinx.coroutines.launch
 import model.LinkProperty
 import model.LinkSearchProperty
 import model.Search
-import usecase.AddUrlToDatabaseUseCase
 import usecase.DeleteItemUseCase
 import usecase.GetFilteredTagsUseCase
-import usecase.IsValidUrlUseCase
 import usecase.ObserveLinkPropertiesUseCase
 import usecase.ToggleFavouriteItemUseCase
+import viewmodel.MainScreenState
 import viewmodel.ViewModel
 
 class MainViewModel(
-    private val addUrlToDbUseCase: AddUrlToDatabaseUseCase,
-    private val isValidURLUseCase: IsValidUrlUseCase,
     private val observeLinkPropertiesUseCase: ObserveLinkPropertiesUseCase,
     private val toggleFavouriteItemUseCase: ToggleFavouriteItemUseCase,
     private val deleteItemUseCase: DeleteItemUseCase,
     private val getFilteredTagsUseCase: GetFilteredTagsUseCase
-) : ViewModel {
+) : ViewModel<MainScreenState> {
     private val viewModelJob = SupervisorJob()
     override val viewModelScope: CoroutineScope =
         CoroutineScope(viewModelJob + Dispatchers.Main.immediate)
@@ -41,51 +38,28 @@ class MainViewModel(
     private val search = mutableStateOf(Search())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val state: StateFlow<MainScreenState> = linkSearch.flatMapLatest { linkSearchOperation ->
-        combine(
-            getFilteredTagsUseCase(""),
-            observeLinkPropertiesUseCase(linkSearchOperation),
-            errorOrIdleState
-        ) { tags, linkProperties, errorOrIdleState ->
-            Triple(tags, linkProperties, errorOrIdleState)
-        }
-    }.map { triple ->
-        if (triple.third != null) {
-            checkNotNull(triple.third)
-        } else {
-            MainScreenState.Success(
-                tags = triple.first.map { it.name },
-                linkProperties = triple.second
-            )
-        }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, MainScreenState.Idle)
-
-    sealed class MainScreenState {
-        data object Idle : MainScreenState()
-        data object Failure : MainScreenState()
-        data object InvalidUrl : MainScreenState()
-        data class Success(val tags: List<String>, val linkProperties: List<LinkProperty>) :
-            MainScreenState()
-
-        data object Empty : MainScreenState()
-    }
+    override val state: StateFlow<MainScreenState> =
+        linkSearch.flatMapLatest { linkSearchOperation ->
+            combine(
+                getFilteredTagsUseCase(""),
+                observeLinkPropertiesUseCase(linkSearchOperation),
+                errorOrIdleState
+            ) { tags, linkProperties, errorOrIdleState ->
+                Triple(tags, linkProperties, errorOrIdleState)
+            }
+        }.map { triple ->
+            if (triple.third != null) {
+                checkNotNull(triple.third)
+            } else {
+                MainScreenState.Success(
+                    tags = triple.first.map { it.name },
+                    linkProperties = triple.second
+                )
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, MainScreenState.Idle)
 
     init {
         viewModelScope.launch { linkSearch.emit(search.value) }
-    }
-
-    fun validateAndGetMetadata(url: String) {
-        viewModelScope.launch {
-            if (!isValidURLUseCase(url)) {
-                errorOrIdleState.emit(MainScreenState.InvalidUrl)
-            } else {
-                try {
-                    addUrlToDbUseCase(url)
-                } catch (exception: Exception) {
-                    errorOrIdleState.emit(MainScreenState.Failure)
-                }
-            }
-        }
     }
 
     override fun dispose() {

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.collectLatest
 import navigation.BackStackHandler
 import navigation.Navigation
 import theme.AppTheme
+import ui.AddNewLinkScreen
 import ui.MainScreen
 import ui.TagsScreen
 
@@ -41,7 +42,7 @@ fun App(onAppExit: () -> Unit) {
             AnimatedContent(
                 targetState = navigationState.value,
                 transitionSpec = {
-                    if (targetState == Navigation.MainScreen) {
+                    if (targetState == backStackHandler.initialScreen) {
                         slideInHorizontally(initialOffsetX = { width -> -width }) + fadeIn() togetherWith slideOutHorizontally(
                             targetOffsetX = { width -> width }
                         ) + fadeOut()
@@ -54,14 +55,9 @@ fun App(onAppExit: () -> Unit) {
                 }
             ) {
                 when (val state = navigationState.value) {
-                    Navigation.MainScreen -> {
-                        MainScreen(backStackHandler)
-                    }
-
-                    is Navigation.TagsScreen -> {
-                        TagsScreen(state.linkToModify, backStackHandler)
-                    }
-
+                    Navigation.MainScreen -> MainScreen(backStackHandler)
+                    is Navigation.TagsScreen -> TagsScreen(state.linkToModify, backStackHandler)
+                    Navigation.AddNewLinkScreen -> AddNewLinkScreen(backStackHandler)
                     null -> onAppExit()
                 }
             }

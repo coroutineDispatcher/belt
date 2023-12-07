@@ -25,32 +25,35 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import di.BeltAppDI
 import model.LinkProperty
 import navigation.BackStackHandler
-import viewmodel.tags.TagsViewModel
+import viewmodel.TagsState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
     val viewModel = remember { BeltAppDI.tagsViewModel(linkToModify) }
-    val tagToSearchQuery = remember { mutableStateOf("") }
+    var tagToSearchQuery by remember { mutableStateOf("") }
     val state = viewModel.state.collectAsState()
-    val dataTags = remember { mutableStateOf(listOf<String>()) }
+    var dataTags by remember { mutableStateOf(listOf<String>()) }
     val dataCurrentLinkProperty = remember { mutableStateOf(linkToModify) }
     val interactionSource = remember { MutableInteractionSource() }
+
     DisposableEffect(Unit) {
         onDispose { viewModel.dispose() }
     }
 
-    key(tagToSearchQuery.value) {
-        viewModel.search(tagToSearchQuery.value)
+    key(tagToSearchQuery) {
+        viewModel.search(tagToSearchQuery)
     }
 
     Scaffold(
@@ -63,17 +66,17 @@ fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
                 ) {
                     Box(modifier = Modifier.padding(16.dp)) {
                         OutlinedTextField(
-                            value = tagToSearchQuery.value,
+                            value = tagToSearchQuery,
                             onValueChange = {
-                                tagToSearchQuery.value = it
+                                tagToSearchQuery = it
                             },
                             placeholder = {
                                 Text(text = "Search or add a new tag")
                             },
                             modifier = Modifier.height(56.dp).fillMaxWidth(),
                             trailingIcon = {
-                                if (tagToSearchQuery.value.isNotEmpty()) {
-                                    IconButton(onClick = { tagToSearchQuery.value = "" }) {
+                                if (tagToSearchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { tagToSearchQuery = "" }) {
                                         Icon(
                                             Icons.Filled.Clear,
                                             "Clear Text"
@@ -98,19 +101,19 @@ fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
     ) { paddingValues ->
         Surface(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                if (!dataTags.value.contains(tagToSearchQuery.value) &&
-                    tagToSearchQuery.value.isNotEmpty()
+                if (!dataTags.contains(tagToSearchQuery) &&
+                    tagToSearchQuery.isNotEmpty()
                 ) {
                     item {
                         TagListItem(
-                            textToDisplay = "Add new tag: ${tagToSearchQuery.value}",
+                            textToDisplay = "Add new tag: $tagToSearchQuery",
                             showRemoveTagButton = false,
                             onRemoveTag = { Unit },
                             onListItemClicked = {
-                                if (tagToSearchQuery.value.isEmpty()) return@TagListItem
+                                if (tagToSearchQuery.isEmpty()) return@TagListItem
                                 viewModel.addTagToItem(
                                     dataCurrentLinkProperty.value,
-                                    tagToSearchQuery.value,
+                                    tagToSearchQuery,
                                     then = { backStackHandler.popToLast() }
                                 )
                             }
@@ -118,7 +121,7 @@ fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
                     }
                 }
 
-                items(dataTags.value) { tag ->
+                items(dataTags) { tag ->
                     TagListItem(
                         textToDisplay = tag,
                         showRemoveTagButton = dataCurrentLinkProperty.value.tags.contains(tag),
@@ -141,10 +144,10 @@ fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
             }
         }
         when (val currentState = state.value) {
-            TagsViewModel.TagsState.Finish -> backStackHandler.popToLast()
-            TagsViewModel.TagsState.Idle -> Unit
-            is TagsViewModel.TagsState.Success -> {
-                dataTags.value = currentState.tags
+            TagsState.Finish -> backStackHandler.popToLast()
+            TagsState.Idle -> Unit
+            is TagsState.Success -> {
+                dataTags = currentState.tags
                 dataCurrentLinkProperty.value = currentState.linkProperty
             }
         }

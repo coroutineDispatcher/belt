@@ -17,6 +17,7 @@ import model.LinkTagOperation
 import usecase.GetFilteredTagsUseCase
 import usecase.GetLinkPropertyUseCase
 import usecase.UpdateTagForLinkPropertyUseCase
+import viewmodel.TagsState
 import viewmodel.ViewModel
 
 class TagsViewModel(
@@ -24,14 +25,14 @@ class TagsViewModel(
     private val updateTagForLinkPropertyUseCase: UpdateTagForLinkPropertyUseCase,
     private val linkPropertyToModify: LinkProperty,
     private val getLinkPropertyByIdUseCase: GetLinkPropertyUseCase
-) : ViewModel {
+) : ViewModel<TagsState> {
     override val viewModelScope: CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private val searchTrigger = MutableSharedFlow<String>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val state = searchTrigger.flatMapLatest { query ->
+    override val state = searchTrigger.flatMapLatest { query ->
         combine(
             getFilteredTagsUseCase(query),
             getLinkPropertyByIdUseCase(linkPropertyToModify)
@@ -44,12 +45,6 @@ class TagsViewModel(
 
     init {
         viewModelScope.launch { searchTrigger.emit("") }
-    }
-
-    sealed class TagsState {
-        data object Idle : TagsState()
-        data class Success(val tags: List<String>, val linkProperty: LinkProperty) : TagsState()
-        data object Finish : TagsState()
     }
 
     override fun dispose() {

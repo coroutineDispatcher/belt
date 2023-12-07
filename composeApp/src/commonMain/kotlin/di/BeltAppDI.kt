@@ -22,6 +22,7 @@ import usecase.ObserveLinkPropertiesUseCase
 import usecase.ToggleFavouriteItemUseCase
 import usecase.UpdateTagForLinkPropertyUseCase
 import viewmodel.main.MainViewModel
+import viewmodel.newLinkProperty.NewLinkPropertyViewModel
 import viewmodel.tags.TagsViewModel
 
 object BeltAppDI {
@@ -46,8 +47,6 @@ object BeltAppDI {
     private val getLinkPropertyUseCase by lazy { GetLinkPropertyUseCase(linkRepository) }
 
     fun mainViewModel() = MainViewModel(
-        addUrlToDatabaseUseCase,
-        isValidUrlUseCase,
         observeLinkPropertiesUseCase,
         toggleFavouriteItemUseCase,
         deleteItemUseCase,
@@ -59,6 +58,11 @@ object BeltAppDI {
         updateTagForLinkPropertyUseCase,
         linkProperty,
         getLinkPropertyUseCase
+    )
+
+    fun newLinkViewModel() = NewLinkPropertyViewModel(
+        addUrlToDatabaseUseCase,
+        isValidUrlUseCase
     )
 
     val kamelConfig = KamelConfig {

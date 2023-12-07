@@ -13,15 +13,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,16 +41,14 @@ import model.LinkProperty
 import model.LinkSearchProperty
 import navigation.BackStackHandler
 import navigation.Navigation
-import viewmodel.main.MainViewModel
+import viewmodel.MainScreenState
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     backStackHandler: BackStackHandler
 ) {
     val viewModel = remember { BeltAppDI.mainViewModel() }
     val linkManager = remember { linkManager }
-    var url by remember { mutableStateOf("") }
     var data by remember { mutableStateOf(emptyList<LinkProperty>()) }
     var searchQuery by remember { mutableStateOf("") }
     val interactionSource = remember { MutableInteractionSource() }
@@ -69,32 +67,13 @@ fun MainScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    OutlinedTextField(
-                        value = url,
-                        onValueChange = { url = it },
-                        placeholder = {
-                            Text(text = "Place your link here")
-                        },
-                        modifier = Modifier.height(50.dp).weight(2f)
-                    )
-                    TextButton(
-                        onClick = {
-                            viewModel.validateAndGetMetadata(url)
-                            url = ""
-                        },
-                        modifier = Modifier.wrapContentHeight().fillMaxWidth()
-                            .align(Alignment.CenterVertically).weight(1f)
-                            .padding(4.dp)
-                    ) {
-                        Text("Add")
-                    }
-                }
+            Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                ExtendedFloatingActionButton(
+                    modifier = Modifier.padding(16.dp).align(Alignment.Center).fillMaxWidth(),
+                    onClick = { backStackHandler.add(Navigation.AddNewLinkScreen) },
+                    text = { Text("Add new item") },
+                    icon = { Icon(Icons.Filled.Add, Icons.Filled.Add.name) }
+                )
             }
         },
         topBar = {
@@ -103,7 +82,7 @@ fun MainScreen(
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(modifier = Modifier.padding(16.dp)) {
+                    Box(modifier = Modifier.padding(8.dp)) {
                         OutlinedTextField(
                             value = searchQuery,
                             onValueChange = {
@@ -123,12 +102,16 @@ fun MainScreen(
                                     }
                                 }
                             },
-                            interactionSource = interactionSource
+                            interactionSource = interactionSource,
+                            maxLines = 1
                         )
                     }
                 }
 
-                LazyRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 2.dp, start = 4.dp, end = 4.dp)
+                ) {
                     items(dataLinkSearchProperties) { linkSearchProperty ->
                         DarkeningChip(
                             currentTag = "${linkSearchProperty.emoji} ${linkSearchProperty.name}",
@@ -138,7 +121,10 @@ fun MainScreen(
                     }
                 }
 
-                LazyRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 2.dp, bottom = 2.dp, start = 4.dp, end = 4.dp)
+                ) {
                     items(dataTags) { currentTag ->
                         DarkeningChip(
                             currentTag = currentTag,
@@ -173,39 +159,13 @@ fun MainScreen(
             }
 
             when (val currentState = state.value) {
-                is MainViewModel.MainScreenState.Success -> {
+                is MainScreenState.Success -> {
                     data = currentState.linkProperties
                     dataTags = currentState.tags
                 }
 
-                MainViewModel.MainScreenState.Failure -> {
-                    BeltDialog(
-                        title = "Something went wrong",
-                        content = "Something went wrong. Please try again.",
-                        onDismiss = {
-                            viewModel.backToIdle()
-                        },
-                        onConfirm = {
-                            viewModel.backToIdle()
-                        }
-                    )
-                }
-
-                MainViewModel.MainScreenState.InvalidUrl -> {
-                    BeltDialog(
-                        title = "Invalid URL",
-                        content = "The submitted URL is invalid. Please try another one.",
-                        onDismiss = {
-                            viewModel.backToIdle()
-                        },
-                        onConfirm = {
-                            viewModel.backToIdle()
-                        }
-                    )
-                }
-
-                MainViewModel.MainScreenState.Idle -> Unit
-                MainViewModel.MainScreenState.Empty -> Surface(
+                MainScreenState.Idle -> Unit
+                MainScreenState.Empty -> Surface(
                     modifier = Modifier.fillMaxWidth().fillMaxSize()
                 ) {
                     Text("Implement empty state", color = Color.Black)
