@@ -62,6 +62,11 @@ kotlin {
             implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
             implementation("media.kamel:kamel-image:0.9.0")
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+            implementation("app.cash.turbine:turbine:1.0.0")
+        }
     }
 }
 
