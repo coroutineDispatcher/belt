@@ -9,7 +9,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class BackStackHandlerTest {
     private val sut = BackStackHandler(initialScreen = Navigation.MainScreen)
 
