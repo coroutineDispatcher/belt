@@ -26,7 +26,7 @@ or android native libs.
 ## Features:
 
 - CRUD with Links
-- CR with Tags
+- CRUD with Tags
 - Search and filter
 - Add to favorites
 - Social share with friends
@@ -39,8 +39,6 @@ or android native libs.
   I would like the links to be stored somewhere on the cloud. Let's see if I find a nice and cheap
   solution to make it online for everyone.
 - Add more info to the saved links like date and time of creation or their update.
-- Some basic builds using Github actions to insure better continuous development/continuous
-  integration
 - Empty state screens
 
 # Testing
