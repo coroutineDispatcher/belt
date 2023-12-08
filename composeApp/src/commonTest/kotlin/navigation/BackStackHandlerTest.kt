@@ -1,7 +1,6 @@
 package navigation
 
 import app.cash.turbine.test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import model.LinkProperty
 import kotlin.test.Test

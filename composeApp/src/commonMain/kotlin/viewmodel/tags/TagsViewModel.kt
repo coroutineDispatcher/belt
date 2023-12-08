@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import model.LinkProperty
 import model.LinkTagOperation
+import usecase.DeleteTagUseCase
 import usecase.GetFilteredTagsUseCase
 import usecase.GetLinkPropertyUseCase
 import usecase.UpdateTagForLinkPropertyUseCase
@@ -24,7 +25,8 @@ class TagsViewModel(
     getFilteredTagsUseCase: GetFilteredTagsUseCase,
     private val updateTagForLinkPropertyUseCase: UpdateTagForLinkPropertyUseCase,
     private val linkPropertyToModify: LinkProperty,
-    private val getLinkPropertyByIdUseCase: GetLinkPropertyUseCase
+    private val getLinkPropertyByIdUseCase: GetLinkPropertyUseCase,
+    private val deleteTagUseCase: DeleteTagUseCase
 ) : ViewModel<TagsState> {
     override val viewModelScope: CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -67,6 +69,12 @@ class TagsViewModel(
     fun removeTagFromLinkProperty(linkToModify: LinkProperty, tagToRemove: String) {
         viewModelScope.launch {
             updateTagForLinkPropertyUseCase(linkToModify, tagToRemove, LinkTagOperation.Remove)
+        }
+    }
+
+    fun deleteTag(tag: String) {
+        viewModelScope.launch {
+            deleteTagUseCase.invoke(tag, linkPropertyToModify)
         }
     }
 }

@@ -116,7 +116,9 @@ fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
                                     tagToSearchQuery,
                                     then = { backStackHandler.popToLast() }
                                 )
-                            }
+                            },
+                            onDeleteTag = { Unit },
+                            showDeleteTagButton = false
                         )
                     }
                 }
@@ -138,7 +140,9 @@ fun TagsScreen(linkToModify: LinkProperty, backStackHandler: BackStackHandler) {
                                 dataCurrentLinkProperty.value,
                                 tag
                             )
-                        }
+                        },
+                        showDeleteTagButton = true,
+                        onDeleteTag = { tag -> viewModel.deleteTag(tag) }
                     )
                 }
             }

@@ -3,8 +3,11 @@ package datasource
 import io.realm.kotlin.Realm
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.types.RealmUUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import model.Tag
 
 class TagsDatasource(private val realm: Realm) {
@@ -30,5 +33,14 @@ class TagsDatasource(private val realm: Realm) {
     private fun String.exists(): Boolean {
         val result = realm.query<Tag>("name == $0", this).first().find()
         return result != null
+    }
+
+    suspend fun deleteTag(tag: String) = withContext(Dispatchers.IO) {
+        val item = realm.query<Tag>("name == $0", tag).find().firstOrNull()
+        realm.write {
+            item?.let { itemToDelete ->
+                findLatest(itemToDelete)?.also { delete(it) }
+            }
+        }
     }
 }

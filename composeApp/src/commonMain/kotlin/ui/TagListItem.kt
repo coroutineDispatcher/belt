@@ -11,6 +11,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,8 +22,10 @@ import androidx.compose.ui.unit.dp
 fun TagListItem(
     textToDisplay: String,
     showRemoveTagButton: Boolean = false,
+    showDeleteTagButton: Boolean = false,
     onListItemClicked: () -> Unit,
-    onRemoveTag: () -> Unit
+    onRemoveTag: () -> Unit,
+    onDeleteTag: (String) -> Unit
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -42,14 +45,24 @@ fun TagListItem(
 
         if (showRemoveTagButton) {
             IconButton(
-                onClick = {
-                    onRemoveTag()
-                },
+                onClick = { onRemoveTag() },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
                     Icons.Filled.Clear,
                     "Remove tag"
+                )
+            }
+        }
+
+        if (showDeleteTagButton) {
+            IconButton(
+                onClick = { onDeleteTag(textToDisplay) },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    Icons.Filled.Delete,
+                    Icons.Filled.Delete.name
                 )
             }
         }

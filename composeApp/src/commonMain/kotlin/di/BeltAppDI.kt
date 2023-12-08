@@ -15,6 +15,7 @@ import model.Tag
 import repository.LinksRepository
 import usecase.AddUrlToDatabaseUseCase
 import usecase.DeleteItemUseCase
+import usecase.DeleteTagUseCase
 import usecase.GetFilteredTagsUseCase
 import usecase.GetLinkPropertyUseCase
 import usecase.IsValidUrlUseCase
@@ -45,6 +46,7 @@ object BeltAppDI {
         )
     }
     private val getLinkPropertyUseCase by lazy { GetLinkPropertyUseCase(linkRepository) }
+    private val deleteTagUseCase by lazy { DeleteTagUseCase(linkRepository) }
 
     fun mainViewModel() = MainViewModel(
         observeLinkPropertiesUseCase,
@@ -57,7 +59,8 @@ object BeltAppDI {
         getTagsUseCase,
         updateTagForLinkPropertyUseCase,
         linkProperty,
-        getLinkPropertyUseCase
+        getLinkPropertyUseCase,
+        deleteTagUseCase
     )
 
     fun newLinkViewModel() = NewLinkPropertyViewModel(

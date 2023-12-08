@@ -3,7 +3,6 @@ package repository
 import datasource.LinkDatasource
 import datasource.TagsDatasource
 import io.realm.kotlin.types.RealmUUID
-import kotlinx.coroutines.flow.filter
 import model.LinkProperty
 import model.LinkTagOperation
 import model.Search
@@ -39,5 +38,11 @@ class LinksRepository(
 
     fun getLinkPropertyByIdAsFlow(id: RealmUUID) = linksDatasource.getPropertyById(id)
 
-    fun linkPropertiesObserver(search: Search) = linksDatasource.linkPropertiesDatabaseObservable(search)
+    fun linkPropertiesObserver(search: Search) =
+        linksDatasource.linkPropertiesDatabaseObservable(search)
+
+    suspend fun deleteTag(tag: String, linkPropertyToModify: LinkProperty) {
+        linksDatasource.updateTag(linkPropertyToModify, tag, LinkTagOperation.Remove)
+        tagsDatasource.deleteTag(tag)
+    }
 }
